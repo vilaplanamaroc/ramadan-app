@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b3d2e" />
+  <title>رمضان — المتابعة اليومية</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    :root{
+      --bg:#07131a;
+      --panel:#0b1f27;
+      --text:#ecf5ff;
+      --muted:#b8c6d6;
+      --border:rgba(255,255,255,.10);
+      --accent:#22c55e;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, "Noto Naskh Arabic", "Noto Kufi Arabic", sans-serif;
+      background: radial-gradient(1200px 600px at 10% 0%, #143042 0%, var(--bg) 60%);
+      color:var(--text);
+    }
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(10px);
+      background: rgba(7,19,26,.78);
+      border-bottom:1px solid var(--border);
+    }
+    h1{margin:0 0 10px 0;font-size:18px;font-weight:900;letter-spacing:.2px}
+    .tabs{display:flex; gap:8px; flex-wrap:wrap}
+    .tab{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:800;
+      box-shadow: var(--shadow);
+      user-select:none;
+    }
+    .tab.active{
+      background: rgba(34,197,94,.14);
+      border-color: rgba(34,197,94,.35);
+    }
+
+    .card{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      border-radius:18px;
+      padding:14px;
+      box-shadow: var(--shadow);
+    }
+    .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between}
+    .pill{
+      border:1px solid var(--border);
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.04);
+      color:var(--muted);
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .btns{display:flex; gap:8px; flex-wrap:wrap}
+    button{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:800;
+      box-shadow: var(--shadow);
+    }
+    button:active{transform: translateY(1px)}
+    .danger{border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10)}
+
+    .progress{
+      width:100%;
+      height:12px;
+      background: rgba(255,255,255,.08);
+      border:1px solid var(--border);
+      border-radius:999px;
+      overflow:hidden;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.35);
+      margin-top:10px;
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, #16a34a, #22c55e);
+      transition: width .2s ease;
+    }
+
+    /* Quran grid */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+    .hizb{
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      border-radius:16px;
+      padding:12px;
+      box-shadow: var(--shadow);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      min-height:70px;
+    }
+    .hizb.done{
+      background: rgba(34,197,94,.12);
+      border-color: rgba(34,197,94,.35);
+    }
+    .hizb .title{font-size:18px;font-weight:900}
+    .sub{font-size:12px;color:var(--muted);margin-top:4px}
+    input[type="checkbox"]{
+      width:28px; height:28px;
+      accent-color: var(--accent);
+      cursor:pointer;
+    }
+
+    /* Tables */
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border-radius:14px;
+      border:1px solid var(--border);
+      margin-top:12px
+    }
+    th, td{padding:10px; border-bottom:1px solid var(--border); font-size:14px; text-align:center}
+    th{background: rgba(255,255,255,.06); color: var(--muted); font-weight:900}
+    td:first-child, th:first-child{text-align:right}
+    tr:last-child td{border-bottom:none}
+    .small{font-size:12px;color:var(--muted)}
+    .status-good{color: var(--accent); font-weight:900}
+    .status-warn{color: var(--warn); font-weight:900}
+    .status-bad{color: var(--bad); font-weight:900}
+
+    /* Inputs */
+    .in{
+      width:100%;
+      background: rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      color:var(--text);
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:14px;
+      outline:none;
+    }
+
+    .section{display:none; padding:16px 0}
+    .section.active{display:block}
+    footer{padding:18px 16px 30px; text-align:center; color:var(--muted); font-size:12px}
+
+    .toast{
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      background: rgba(0,0,0,.65);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      display:none;
+      max-width: 90vw;
+    }
+
+    /* Dashboard circles (lightweight) */
+    .dashGrid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+    .ring{
+      --p:0; /* percent 0..100 */
+      width:104px; height:104px; border-radius:50%;
+      background:
+        conic-gradient(var(--accent) calc(var(--p)*1%), rgba(255,255,255,.10) 0);
+      display:flex; align-items:center; justify-content:center;
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+      position:relative;
+    }
+    .ring::after{
+      content:"";
+      position:absolute;
+      width:78px; height:78px; border-radius:50%;
+      background: rgba(7,19,26,.85);
+      border:1px solid var(--border);
+    }
+    .ringText{
+      position:relative; z-index:2;
+      display:flex; flex-direction:column; align-items:center; gap:4px;
+      font-weight:900;
+    }
+    .ringText .pct{font-size:18px}
+    .ringText .lbl{font-size:11px; color:var(--muted); font-weight:800}
+    .metricLine{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+    .metric{flex:1; min-width:160px}
+    .metric .k{font-size:12px;color:var(--muted);font-weight:900}
+    .metric .v{font-size:18px;font-weight:900;margin-top:6px}
+
+    /* Modal */
+    .modalBg{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      z-index:50;
+    }
+    .modal{
+      width:min(520px, 100%);
+      border:1px solid var(--border);
+      background: rgba(11,31,39,.98);
+      border-radius:18px;
+      padding:14px;
+      box-shadow: var(--shadow);
+    }
+    .modal h2{margin:0 0 10px 0; font-size:16px; font-weight:900}
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="wrap">
+    <h1>رمضان — المتابعة اليومية</h1>
+    <div class="tabs">
+      <div class="tab active" data-tab="dash">لوحة التحكم</div>
+      <div class="tab" data-tab="quran">القرآن (الأحزاب)</div>
+      <div class="tab" data-tab="prayer">الصلاة (30 يوم)</div>
+      <div class="tab" data-tab="fast">الصيام</div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- DASHBOARD -->
+  <section id="dash" class="section active">
+    <div class="card">
+      <div class="row">
+        <div>
+          <div style="font-weight:900">ملخص رمضان</div>
+          <div class="small">واجهة واضحة + إحصائيات متقدمة بدون تعقيد</div>
+        </div>
+        <div class="btns">
+          <button id="openSettings">الإعدادات</button>
+        </div>
+      </div>
+
+      <div class="dashGrid">
+        <div class="card">
+          <div class="row" style="align-items:flex-start">
+            <div class="ring" id="ringGlobal" style="--p:0">
+              <div class="ringText">
+                <div class="pct" id="globalPct">0%</div>
+                <div class="lbl">الإجمالي</div>
+              </div>
+            </div>
+            <div class="metricLine" style="flex:1">
+              <div class="metric">
+                <div class="k">القرآن</div>
+                <div class="v" id="dashQuran">0/60</div>
+              </div>
+              <div class="metric">
+                <div class="k">الصلاة</div>
+                <div class="v" id="dashPrayer">0/180</div>
+              </div>
+              <div class="metric">
+                <div class="k">غير صائم</div>
+                <div class="v" id="dashFast">0 يوم</div>
+              </div>
+            </div>
+          </div>
+          <div class="progress"><div class="bar" id="dashBar"></div></div>
+          <div class="small" style="margin-top:10px" id="dashNote">
+            لتفعيل "اليوم الحالي"، حدّد تاريخ بداية رمضان من الإعدادات (اختياري).
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <div style="font-weight:900">اليوم الحالي (الصلاة)</div>
+            <div class="pill" id="todayPill">اليوم: —</div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <div class="pill" id="yesterdayPill">الأمس: —</div>
+            <div class="pill" id="perfectPill">أيام 6/6: 0</div>
+            <div class="pill" id="incompletePill">أيام ناقصة: 0</div>
+          </div>
+          <div class="dashGrid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top:12px">
+            <div class="card">
+              <div class="row">
+                <div class="ring" id="ringQuran" style="--p:0">
+                  <div class="ringText">
+                    <div class="pct" id="qRingPct">0%</div>
+                    <div class="lbl">القرآن</div>
+                  </div>
+                </div>
+                <div style="flex:1">
+                  <div class="small">نسبة إنجاز الأحزاب</div>
+                  <div style="font-weight:900; font-size:18px; margin-top:6px" id="qDashLine">0 من 60</div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="row">
+                <div class="ring" id="ringPrayer" style="--p:0">
+                  <div class="ringText">
+                    <div class="pct" id="pRingPct">0%</div>
+                    <div class="lbl">الصلاة</div>
+                  </div>
+                </div>
+                <div style="flex:1">
+                  <div class="small">نسبة إنجاز الصلاة</div>
+                  <div style="font-weight:900; font-size:18px; margin-top:6px" id="pDashLine">0 من 180</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="small" style="margin-top:10px">
+            ملاحظة: جدول الصلاة فيه 6 صلوات (الفجر، الظهر، العصر، المغرب، العشاء، التراويح).
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QURAN -->
+  <section id="quran" class="section">
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="pill" id="qCount">تم إنجاز 0/60</div>
+          <div class="pill" id="qPercent" style="margin-top:8px;display:inline-block">0%</div>
+        </div>
+        <div class="btns">
+          <button id="qAll">تحديد الكل</button>
+          <button id="qNone">إلغاء الكل</button>
+          <button id="qReset" class="danger">إعادة ضبط</button>
+        </div>
+      </div>
+      <div class="progress"><div class="bar" id="qBar"></div></div>
+      <div class="grid" id="qGrid"></div>
+    </div>
+  </section>
+
+  <!-- PRAYER -->
+  <section id="prayer" class="section">
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="pill" id="pCount">تم إنجاز 0/180</div>
+          <div class="pill" id="pPercent" style="margin-top:8px;display:inline-block">0%</div>
+        </div>
+        <div class="btns">
+          <button id="pReset" class="danger">إعادة ضبط</button>
+        </div>
+      </div>
+      <div class="progress"><div class="bar" id="pBar"></div></div>
+
+      <table aria-label="جدول الصلاة 30 يوم">
+        <thead>
+          <tr>
+            <th>اليوم</th>
+            <th>الفجر</th>
+            <th>الظهر</th>
+            <th>العصر</th>
+            <th>المغرب</th>
+            <th>العشاء</th>
+            <th>تراويح</th>
+            <th>النتيجة</th>
+          </tr>
+        </thead>
+        <tbody id="pBody"></tbody>
+      </table>
+      <div class="small" style="margin-top:10px">
+        إذا كان اليوم 4/6 فهذا يعني أن هناك صلاتين لم تُسجّل بعد.
+      </div>
+    </div>
+  </section>
+
+  <!-- FASTING -->
+  <section id="fast" class="section">
+    <div class="card">
+      <div class="row">
+        <div>
+          <div style="font-weight:900">تسجيل الأيام غير المصامة</div>
+          <div class="small">أضف تاريخ + عنوان اليوم (اختياري) + سبب (اختياري)</div>
+        </div>
+        <div class="pill" id="fTotal">المجموع: 0 يوم</div>
+      </div>
+
+      <div style="margin-top:12px; display:grid; gap:10px; grid-template-columns: 1fr 1fr 1fr;">
+        <input class="in" id="fDate" type="date" />
+        <input class="in" id="fTitle" type="text" placeholder="عنوان اليوم (مثال: يوم 7)" />
+        <input class="in" id="fReason" type="text" placeholder="سبب (اختياري)" />
+      </div>
+      <div class="btns" style="margin-top:10px">
+        <button id="fAdd">إضافة يوم غير صائم</button>
+        <button id="fClear" class="danger">مسح الكل</button>
+      </div>
+
+      <table aria-label="أيام غير صائم">
+        <thead>
+          <tr>
+            <th>التاريخ</th>
+            <th>اليوم</th>
+            <th>غير صائم</th>
+            <th>السبب</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="fBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  يعمل بدون إنترنت بعد أول فتح (PWA). الأرقام بالأرقام العادية: 123.
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- Settings Modal -->
+<div class="modalBg" id="modalBg">
+  <div class="modal">
+    <div class="row">
+      <h2 style="margin:0">الإعدادات</h2>
+      <button id="closeSettings">إغلاق</button>
+    </div>
+
+    <div class="card" style="margin-top:10px">
+      <div style="font-weight:900">تاريخ بداية رمضان (اختياري)</div>
+      <div class="small" style="margin-top:6px">
+        إذا حدّدته، سيظهر "اليوم الحالي" تلقائياً في لوحة التحكم (اليوم 1..30).
+      </div>
+      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+        <input class="in" id="ramadanStart" type="date" style="max-width:260px" />
+        <button id="saveStart">حفظ</button>
+        <button id="clearStart" class="danger">مسح</button>
+      </div>
+      <div class="small" style="margin-top:10px" id="startHint">—</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== Helpers =====
+  function toast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display='block';
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(()=> t.style.display='none', 1800);
+  }
+
+  // ===== Tabs =====
+  const tabs = document.querySelectorAll('.tab');
+  const sections = document.querySelectorAll('.section');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const id = tab.dataset.tab;
+      sections.forEach(s => s.classList.toggle('active', s.id === id));
+    });
+  });
+
+  // ===== Storage keys =====
+  const KEY_Q = "ramadan_quran_hizb_60_v2";
+  const KEY_P = "ramadan_prayer_30x6_v2";
+  const KEY_F = "ramadan_fasting_notfasted_v2";
+  const KEY_META = "ramadan_meta_v2";
+
+  function loadMeta(){
+    try{
+      const raw = localStorage.getItem(KEY_META);
+      if(!raw) return { startDate: "" };
+      const obj = JSON.parse(raw);
+      return { startDate: (obj && typeof obj.startDate === "string") ? obj.startDate : "" };
+    }catch{
+      return { startDate: "" };
+    }
+  }
+  function saveMeta(meta){ localStorage.setItem(KEY_META, JSON.stringify(meta)); }
+  let meta = loadMeta();
+
+  // ===== Quran =====
+  function loadQ(){
+    try{
+      const raw = localStorage.getItem(KEY_Q);
+      if(!raw) return Array(60).fill(false);
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr) || arr.length !== 60) return Array(60).fill(false);
+      return arr.map(Boolean);
+    }catch{ return Array(60).fill(false); }
+  }
+  function saveQ(st){ localStorage.setItem(KEY_Q, JSON.stringify(st)); }
+  let qState = loadQ();
+
+  const qGrid = document.getElementById('qGrid');
+  const qCount = document.getElementById('qCount');
+  const qPercent = document.getElementById('qPercent');
+  const qBar = document.getElementById('qBar');
+
+  function qUpdateHeader(){
+    const done = qState.filter(Boolean).length;
+    const pct = Math.round(done/60*100);
+    qCount.textContent = `تم إنجاز ${done}/60`;
+    qPercent.textContent = `${pct}%`;
+    qBar.style.width = pct + "%";
+  }
+  function qRender(){
+    qGrid.innerHTML = "";
+    for(let i=1;i<=60;i++){
+      const idx=i-1;
+      const card = document.createElement('div');
+      card.className = "hizb" + (qState[idx] ? " done" : "");
+      const left = document.createElement('div');
+      const title = document.createElement('div');
+      title.className="title";
+      title.textContent = `الحزب ${i}`;
+      const sub = document.createElement('div');
+      sub.className="sub";
+      sub.textContent = qState[idx] ? "مكتمل" : "غير مكتمل";
+      left.appendChild(title);
+      left.appendChild(sub);
+
+      const cb = document.createElement('input');
+      cb.type="checkbox";
+      cb.checked=!!qState[idx];
+      cb.addEventListener('change', () => {
+        qState[idx]=cb.checked;
+        saveQ(qState);
+        card.className = "hizb" + (qState[idx] ? " done" : "");
+        sub.textContent = qState[idx] ? "مكتمل" : "غير مكتمل";
+        qUpdateHeader();
+        updateDashboard();
+      });
+
+      card.appendChild(left);
+      card.appendChild(cb);
+      qGrid.appendChild(card);
+    }
+    qUpdateHeader();
+  }
+
+  document.getElementById('qAll').onclick = () => { qState = Array(60).fill(true); saveQ(qState); qRender(); toast("تم تحديد الكل"); updateDashboard(); };
+  document.getElementById('qNone').onclick = () => { qState = Array(60).fill(false); saveQ(qState); qRender(); toast("تم إلغاء الكل"); updateDashboard(); };
+  document.getElementById('qReset').onclick = () => {
+    if(!confirm("إعادة ضبط القرآن (60 حزب)؟")) return;
+    qState = Array(60).fill(false); saveQ(qState); qRender(); toast("تمت إعادة الضبط"); updateDashboard();
+  };
+
+  // ===== Prayer (30 days x 6) =====
+  const PRAYERS = ["fajr","dhuhr","asr","maghrib","isha","taraweeh"]; // 6
+  function loadP(){
+    try{
+      const raw = localStorage.getItem(KEY_P);
+      if(!raw) return Array.from({length:30}, ()=> PRAYERS.map(()=>false));
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr) || arr.length!==30) throw 0;
+      return arr.map(day => (Array.isArray(day) && day.length===6) ? day.map(Boolean) : PRAYERS.map(()=>false));
+    }catch{
+      return Array.from({length:30}, ()=> PRAYERS.map(()=>false));
+    }
+  }
+  function saveP(st){ localStorage.setItem(KEY_P, JSON.stringify(st)); }
+  let pState = loadP();
+
+  const pBody = document.getElementById('pBody');
+  const pCount = document.getElementById('pCount');
+  const pPercent = document.getElementById('pPercent');
+  const pBar = document.getElementById('pBar');
+
+  function dayScore(dayArr){ return dayArr.filter(Boolean).length; } // 0..6
+  function scoreClass(n){
+    if(n===6) return "status-good";
+    if(n>=4) return "status-warn";
+    return "status-bad";
+  }
+  function pUpdateHeader(){
+    const totalDone = pState.reduce((acc, d)=> acc + dayScore(d), 0);
+    const totalAll = 30*6; // 180
+    const pct = Math.round(totalDone/totalAll*100);
+    pCount.textContent = `تم إنجاز ${totalDone}/${totalAll}`;
+    pPercent.textContent = `${pct}%`;
+    pBar.style.width = pct + "%";
+  }
+
+  function pRender(){
+    pBody.innerHTML = "";
+    for(let day=1; day<=30; day++){
+      const tr = document.createElement('tr');
+
+      const dayTd = document.createElement('td');
+      dayTd.textContent = `اليوم ${day}`;
+      tr.appendChild(dayTd);
+
+      let scoreTd = document.createElement('td'); // placeholder, will be replaced at end
+      for(let j=0;j<6;j++){
+        const td = document.createElement('td');
+        const cb = document.createElement('input');
+        cb.type="checkbox";
+        cb.checked=!!pState[day-1][j];
+        cb.addEventListener('change', ()=>{
+          pState[day-1][j] = cb.checked;
+          saveP(pState);
+          const sc = dayScore(pState[day-1]);
+          scoreTd.textContent = `${sc}/6`;
+          scoreTd.className = scoreClass(sc);
+          pUpdateHeader();
+          updateDashboard();
+        });
+        td.appendChild(cb);
+        tr.appendChild(td);
+      }
+
+      scoreTd = document.createElement('td');
+      const sc = dayScore(pState[day-1]);
+      scoreTd.textContent = `${sc}/6`;
+      scoreTd.className = scoreClass(sc);
+      tr.appendChild(scoreTd);
+
+      pBody.appendChild(tr);
+    }
+    pUpdateHeader();
+  }
+
+  document.getElementById('pReset').onclick = () => {
+    if(!confirm("إعادة ضبط جدول الصلاة (30 يوم)؟")) return;
+    pState = Array.from({length:30}, ()=> PRAYERS.map(()=>false));
+    saveP(pState);
+    pRender();
+    toast("تمت إعادة الضبط");
+    updateDashboard();
+  };
+
+  // ===== Fasting (list of not-fasted days) =====
+  function loadF(){
+    try{
+      const raw = localStorage.getItem(KEY_F);
+      if(!raw) return [];
+      const arr = JSON.parse(raw);
+      if(!Array.isArray(arr)) return [];
+      return arr.filter(x => x && typeof x === 'object');
+    }catch{ return []; }
+  }
+  function saveF(list){ localStorage.setItem(KEY_F, JSON.stringify(list)); }
+  let fList = loadF();
+
+  const fTotal = document.getElementById('fTotal');
+  const fBody = document.getElementById('fBody');
+
+  function fUpdate(){ fTotal.textContent = `المجموع: ${fList.length} يوم`; }
+  function fRender(){
+    fBody.innerHTML = "";
+    const sorted = [...fList].sort((a,b)=> (a.date||"").localeCompare(b.date||""));
+    sorted.forEach((item) => {
+      const tr = document.createElement('tr');
+
+      const dateTd = document.createElement('td'); dateTd.textContent = item.date || "-";
+      const titleTd = document.createElement('td'); titleTd.textContent = item.title || "-";
+      const flagTd = document.createElement('td'); flagTd.textContent = "✅";
+      const reasonTd = document.createElement('td'); reasonTd.textContent = item.reason || "-";
+
+      const delTd = document.createElement('td');
+      const delBtn = document.createElement('button');
+      delBtn.className = "danger";
+      delBtn.textContent = "حذف";
+      delBtn.style.padding="8px 10px";
+      delBtn.onclick = () => {
+        fList = fList.filter(x => x.id !== item.id);
+        saveF(fList);
+        fRender();
+        toast("تم الحذف");
+        updateDashboard();
+      };
+      delTd.appendChild(delBtn);
+
+      tr.appendChild(dateTd);
+      tr.appendChild(titleTd);
+      tr.appendChild(flagTd);
+      tr.appendChild(reasonTd);
+      tr.appendChild(delTd);
+      fBody.appendChild(tr);
+    });
+    fUpdate();
+  }
+
+  document.getElementById('fAdd').onclick = () => {
+    const date = document.getElementById('fDate').value;
+    const title = document.getElementById('fTitle').value.trim();
+    const reason = document.getElementById('fReason').value.trim();
+
+    if(!date){ toast("المرجو اختيار التاريخ"); return; }
+    if(fList.some(x => x.date === date)){ toast("هذا التاريخ مسجل بالفعل"); return; }
+
+    fList.push({ id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random()), date, title, reason });
+    saveF(fList);
+    document.getElementById('fTitle').value = "";
+    document.getElementById('fReason').value = "";
+    fRender();
+    toast("تمت الإضافة");
+    updateDashboard();
+  };
+
+  document.getElementById('fClear').onclick = () => {
+    if(!confirm("مسح كل الأيام غير المصامة؟")) return;
+    fList = [];
+    saveF(fList);
+    fRender();
+    toast("تم المسح");
+    updateDashboard();
+  };
+
+  // ===== Dashboard =====
+  const dashQuran = document.getElementById('dashQuran');
+  const dashPrayer = document.getElementById('dashPrayer');
+  const dashFast = document.getElementById('dashFast');
+  const dashBar = document.getElementById('dashBar');
+
+  const ringGlobal = document.getElementById('ringGlobal');
+  const ringQuran = document.getElementById('ringQuran');
+  const ringPrayer = document.getElementById('ringPrayer');
+
+  const globalPct = document.getElementById('globalPct');
+  const qRingPct = document.getElementById('qRingPct');
+  const pRingPct = document.getElementById('pRingPct');
+
+  const qDashLine = document.getElementById('qDashLine');
+  const pDashLine = document.getElementById('pDashLine');
+
+  const todayPill = document.getElementById('todayPill');
+  const yesterdayPill = document.getElementById('yesterdayPill');
+  const perfectPill = document.getElementById('perfectPill');
+  const incompletePill = document.getElementById('incompletePill');
+  const dashNote = document.getElementById('dashNote');
+
+  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+  function computeRamadanDay(){
+    if(!meta.startDate) return null;
+    // local date diff (midnight-safe)
+    const start = new Date(meta.startDate + "T00:00:00");
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffDays = Math.floor((today - start) / (1000*60*60*24)) + 1;
+    return clamp(diffDays, 1, 30);
+  }
+
+  function updateDashboard(){
+    const qDone = qState.filter(Boolean).length;
+    const pDone = pState.reduce((acc, d)=> acc + dayScore(d), 0);
+    const totalAll = 60 + 180;
+    const pctGlobal = Math.round((qDone + pDone) / totalAll * 100);
+
+    const pctQ = Math.round(qDone/60*100);
+    const pctP = Math.round(pDone/180*100);
+
+    // pills / lines
+    dashQuran.textContent = `${qDone}/60`;
+    dashPrayer.textContent = `${pDone}/180`;
+    dashFast.textContent = `${fList.length} يوم`;
+
+    qDashLine.textContent = `${qDone} من 60`;
+    pDashLine.textContent = `${pDone} من 180`;
+
+    // rings
+    ringGlobal.style.setProperty("--p", pctGlobal);
+    ringQuran.style.setProperty("--p", pctQ);
+    ringPrayer.style.setProperty("--p", pctP);
+
+    globalPct.textContent = `${pctGlobal}%`;
+    qRingPct.textContent = `${pctQ}%`;
+    pRingPct.textContent = `${pctP}%`;
+
+    dashBar.style.width = pctGlobal + "%";
+
+    // prayer day stats
+    const scores = pState.map(dayScore);
+    const perfectDays = scores.filter(s => s === 6).length;
+    const incompleteDays = scores.filter(s => s >=1 && s <=5).length;
+
+    perfectPill.textContent = `أيام 6/6: ${perfectDays}`;
+    incompletePill.textContent = `أيام ناقصة: ${incompleteDays}`;
+
+    // today / yesterday (if startDate set)
+    const rd = computeRamadanDay();
+    if(rd){
+      const tScore = dayScore(pState[rd-1]);
+      todayPill.textContent = `اليوم (اليوم ${rd}): ${tScore}/6`;
+
+      if(rd > 1){
+        const yScore = dayScore(pState[rd-2]);
+        yesterdayPill.textContent = `الأمس (اليوم ${rd-1}): ${yScore}/6`;
+      }else{
+        yesterdayPill.textContent = `الأمس: —`;
+      }
+      dashNote.textContent = `تاريخ بداية رمضان مضبوط: ${meta.startDate} — اليوم الحالي محسوب تلقائياً.`;
+    }else{
+      todayPill.textContent = `اليوم: —`;
+      // fallback yesterday: last active day
+      let last = -1;
+      for(let i=0;i<30;i++){
+        if(pState[i].some(Boolean)) last = i;
+      }
+      if(last > 0){
+        const y = last; // show previous to last active
+        const yScore = dayScore(pState[y-1]);
+        yesterdayPill.textContent = `الأمس (اليوم ${y}): ${yScore}/6`;
+      }else{
+        yesterdayPill.textContent = `الأمس: —`;
+      }
+      dashNote.textContent = `لتفعيل "اليوم الحالي"، حدّد تاريخ بداية رمضان من الإعدادات (اختياري).`;
+    }
+  }
+
+  // ===== Settings modal =====
+  const modalBg = document.getElementById('modalBg');
+  const ramadanStart = document.getElementById('ramadanStart');
+  const startHint = document.getElementById('startHint');
+
+  function refreshSettingsUI(){
+    ramadanStart.value = meta.startDate || "";
+    startHint.textContent = meta.startDate
+      ? `محدد: ${meta.startDate} (اليوم الحالي سيُحسب تلقائياً)`
+      : `غير محدد حالياً`;
+  }
+
+  document.getElementById('openSettings').onclick = () => {
+    refreshSettingsUI();
+    modalBg.style.display = "flex";
+  };
+  document.getElementById('closeSettings').onclick = () => {
+    modalBg.style.display = "none";
+  };
+  modalBg.addEventListener('click', (e) => {
+    if(e.target === modalBg) modalBg.style.display = "none";
+  });
+
+  document.getElementById('saveStart').onclick = () => {
+    const v = ramadanStart.value;
+    if(!v){ toast("اختر تاريخاً أولاً"); return; }
+    meta.startDate = v;
+    saveMeta(meta);
+    toast("تم حفظ تاريخ بداية رمضان");
+    refreshSettingsUI();
+    updateDashboard();
+  };
+  document.getElementById('clearStart').onclick = () => {
+    meta.startDate = "";
+    saveMeta(meta);
+    toast("تم مسح التاريخ");
+    refreshSettingsUI();
+    updateDashboard();
+  };
+
+  // ===== PWA SW =====
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+    });
+  }
+
+  // ===== Init =====
+  qRender();
+  pRender();
+  fRender();
+  updateDashboard();
+</script>
+</body>
+</html>
