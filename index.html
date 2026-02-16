@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>رمضان — صدقة جارية</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#07131a" />
+
+  <style>
+    :root{
+      --bg:#07131a;
+      --card:#0b2230;
+      --btn:#173445;
+      --btn2:#1d3f55;
+      --txt:#f3f7ff;
+      --muted:#c8d3e6;
+      --stroke:rgba(255,255,255,.12);
+      --focus:rgba(255,255,255,.18);
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:radial-gradient(1200px 800px at 50% 20%, #12344a 0%, var(--bg) 55%, #050c10 100%);
+      color:var(--txt);
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px 14px;
+    }
+
+    /* SPLASH */
+    #splash{
+      position:fixed; inset:0;
+      background:var(--bg);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:9999;
+    }
+    #splash img{
+      width:100%; height:100%;
+      object-fit:cover;
+    }
+    .fadeout{ animation: fadeOut .45s ease forwards; }
+    @keyframes fadeOut{ to{ opacity:0; visibility:hidden; } }
+
+    /* APP (V1 style simple) */
+    .wrap{
+      width:min(560px, 100%);
+      text-align:center;
+    }
+
+    h1{
+      margin:0 0 14px;
+      font-size:30px;
+      letter-spacing:.2px;
+      font-weight:800;
+      text-shadow: 0 8px 24px rgba(0,0,0,.35);
+    }
+
+    .topBtns{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      margin: 10px 0 18px;
+      flex-wrap:wrap;
+    }
+    button{
+      appearance:none;
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, var(--btn2), var(--btn));
+      color:var(--txt);
+      padding:10px 16px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:15px;
+      transition:.15s ease;
+      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+    }
+    button:hover{ transform: translateY(-1px); border-color: var(--focus); }
+    button:active{ transform: translateY(0px); }
+
+    .panel{
+      background: rgba(11,34,48,.55);
+      border:1px solid var(--stroke);
+      border-radius:18px;
+      padding:18px 16px;
+      text-align:right;
+      box-shadow: 0 16px 40px rgba(0,0,0,.35);
+      backdrop-filter: blur(8px);
+    }
+
+    .panelTitle{
+      text-align:center;
+      margin: 4px 0 14px;
+      font-size:22px;
+      font-weight:800;
+      color:var(--txt);
+    }
+
+    .hidden{ display:none; }
+
+    /* Quran list simple */
+    .hizbList{
+      max-height: 52vh;
+      overflow:auto;
+      padding: 6px 6px 2px;
+    }
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      margin-bottom:8px;
+      background: rgba(0,0,0,.10);
+    }
+    .row label{
+      font-weight:700;
+      color:var(--txt);
+    }
+    input[type="checkbox"]{
+      width:22px; height:22px;
+      accent-color: #ffd18a;
+      cursor:pointer;
+    }
+
+    /* Fasting */
+    .fastBox{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    input[type="date"], input[type="text"]{
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.14);
+      color:var(--txt);
+      padding:10px 12px;
+      border-radius:12px;
+      outline:none;
+      min-width: 190px;
+    }
+    ul{
+      list-style:none;
+      padding:0;
+      margin: 14px 0 0;
+    }
+    li{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      margin-bottom:8px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.10);
+      font-weight:650;
+    }
+    .del{
+      background:transparent;
+      border:1px solid rgba(255,255,255,.16);
+      padding:6px 10px;
+      border-radius:10px;
+      box-shadow:none;
+      font-weight:800;
+    }
+
+    /* Prayer table (simple, compact) */
+    .prTable{
+      overflow:auto;
+      max-height: 55vh;
+      padding: 4px;
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing: 0 8px;
+      font-weight:700;
+    }
+    th{
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
+      padding:6px 4px;
+    }
+    td{
+      background: rgba(0,0,0,.10);
+      border:1px solid rgba(255,255,255,.08);
+      padding:10px 6px;
+      text-align:center;
+    }
+    td:first-child{ border-radius:12px 0 0 12px; }
+    td:last-child{ border-radius:0 12px 12px 0; }
+    .dayCell{ width:72px; color:var(--txt); }
+
+    .footerNote{
+      margin-top:14px;
+      color:rgba(255,255,255,.55);
+      font-size:12px;
+      text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Splash -->
+  <div id="splash">
+    <img src="splash.png" alt="Splash">
+  </div>
+
+  <!-- App -->
+  <div class="wrap" id="app" style="display:none;">
+    <h1>رمضان — صدقة جارية</h1>
+
+    <div class="topBtns">
+      <button id="btnQuran">القرآن</button>
+      <button id="btnPrayer">الصلاة</button>
+      <button id="btnFast">الصيام</button>
+    </div>
+
+    <div class="panel">
+      <!-- Quran -->
+      <div id="modQuran">
+        <div class="panelTitle">من الحزب 1 إلى الحزب 60</div>
+        <div class="hizbList" id="hizbList"></div>
+      </div>
+
+      <!-- Prayer -->
+      <div id="modPrayer" class="hidden">
+        <div class="panelTitle">الصلاة (30 يوم) + التراويح</div>
+        <div class="prTable">
+          <table id="prTable"></table>
+        </div>
+      </div>
+
+      <!-- Fast -->
+      <div id="modFast" class="hidden">
+        <div class="panelTitle">الأيام غير المصامة</div>
+
+        <div class="fastBox">
+          <input type="date" id="fastDate">
+          <input type="text" id="fastReason" placeholder="سبب (اختياري)">
+          <button id="addFast">إضافة</button>
+        </div>
+
+        <ul id="fastList"></ul>
+      </div>
+
+      <div class="footerNote">يعمل بدون إنترنت بعد أول فتح (PWA)</div>
+    </div>
+  </div>
+
+<script>
+/* -----------------------------
+   Splash (simple + clean)
+--------------------------------*/
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    const s = document.getElementById("splash");
+    s.classList.add("fadeout");
+    document.getElementById("app").style.display = "block";
+    setTimeout(() => (s.style.display = "none"), 500);
+  }, 1200);
+});
+
+/* -----------------------------
+   Navigation (V1 simple)
+--------------------------------*/
+const modQuran = document.getElementById("modQuran");
+const modPrayer = document.getElementById("modPrayer");
+const modFast = document.getElementById("modFast");
+
+function show(mod){
+  modQuran.classList.add("hidden");
+  modPrayer.classList.add("hidden");
+  modFast.classList.add("hidden");
+  mod.classList.remove("hidden");
+}
+
+document.getElementById("btnQuran").onclick = () => show(modQuran);
+document.getElementById("btnPrayer").onclick = () => show(modPrayer);
+document.getElementById("btnFast").onclick = () => show(modFast);
+
+/* -----------------------------
+   localStorage helpers
+--------------------------------*/
+const LS = {
+  get(key, fallback){
+    try{ return JSON.parse(localStorage.getItem(key)) ?? fallback; }
+    catch{ return fallback; }
+  },
+  set(key, value){
+    localStorage.setItem(key, JSON.stringify(value));
+  }
+};
+
+/* -----------------------------
+   Quran (1..60) with save
+--------------------------------*/
+const hizbList = document.getElementById("hizbList");
+const hizbState = LS.get("hizbState", {}); // { "h1": true, ... }
+
+for(let i=1;i<=60;i++){
+  const row = document.createElement("div");
+  row.className = "row";
+
+  const label = document.createElement("label");
+  label.setAttribute("for", "h"+i);
+  label.textContent = "الحزب " + i;
+
+  const cb = document.createElement("input");
+  cb.type = "checkbox";
+  cb.id = "h"+i;
+  cb.checked = !!hizbState[cb.id];
+
+  cb.addEventListener("change", () => {
+    hizbState[cb.id] = cb.checked;
+    LS.set("hizbState", hizbState);
+  });
+
+  row.appendChild(label);
+  row.appendChild(cb);
+  hizbList.appendChild(row);
+}
+
+/* -----------------------------
+   Prayer table (30 days x 6) with save
+--------------------------------*/
+const PR_KEYS = ["fajr","dhuhr","asr","maghrib","isha","taraweeh"];
+const PR_LABELS = ["الفجر","الظهر","العصر","المغرب","العشاء","التراويح"];
+const prState = LS.get("prState", {}); // { "d1_fajr": true ... }
+
+const prTable = document.getElementById("prTable");
+
+// header
+let thead = document.createElement("thead");
+let hr = document.createElement("tr");
+let thDay = document.createElement("th");
+thDay.textContent = "اليوم";
+hr.appendChild(thDay);
+PR_LABELS.forEach(t=>{
+  let th=document.createElement("th"); th.textContent=t; hr.appendChild(th);
+});
+thead.appendChild(hr);
+prTable.appendChild(thead);
+
+// body
+let tbody = document.createElement("tbody");
+for(let d=1; d<=30; d++){
+  let tr = document.createElement("tr");
+
+  let tdDay = document.createElement("td");
+  tdDay.className="dayCell";
+  tdDay.textContent = d;
+  tr.appendChild(tdDay);
+
+  PR_KEYS.forEach((k, idx)=>{
+    let td = document.createElement("td");
+    let cb = document.createElement("input");
+    cb.type="checkbox";
+    cb.style.width="22px";
+    cb.style.height="22px";
+    cb.style.accentColor="#ffd18a";
+
+    const key = `d${d}_${k}`;
+    cb.checked = !!prState[key];
+
+    cb.addEventListener("change", ()=>{
+      prState[key] = cb.checked;
+      LS.set("prState", prState);
+    });
+
+    td.appendChild(cb);
+    tr.appendChild(td);
+  });
+
+  tbody.appendChild(tr);
+}
+prTable.appendChild(tbody);
+
+/* -----------------------------
+   Fast list with save
+--------------------------------*/
+const fastListEl = document.getElementById("fastList");
+const fastItems = LS.get("fastItems", []); // [{date:"2026-02-19", reason:"..."}, ...]
+
+function renderFast(){
+  fastListEl.innerHTML = "";
+  fastItems.forEach((it, idx)=>{
+    const li = document.createElement("li");
+    const left = document.createElement("span");
+    left.textContent = it.reason ? `${it.date} — ${it.reason}` : it.date;
+
+    const del = document.createElement("button");
+    del.className = "del";
+    del.textContent = "حذف";
+    del.onclick = ()=>{
+      fastItems.splice(idx,1);
+      LS.set("fastItems", fastItems);
+      renderFast();
+    };
+
+    li.appendChild(left);
+    li.appendChild(del);
+    fastListEl.appendChild(li);
+  });
+}
+renderFast();
+
+document.getElementById("addFast").onclick = ()=>{
+  const date = document.getElementById("fastDate").value;
+  const reason = document.getElementById("fastReason").value.trim();
+  if(!date) return;
+
+  // avoid duplicates
+  const exists = fastItems.some(x => x.date === date && (x.reason||"") === (reason||""));
+  if(!exists){
+    fastItems.push({date, reason});
+    LS.set("fastItems", fastItems);
+    renderFast();
+  }
+
+  document.getElementById("fastDate").value = "";
+  document.getElementById("fastReason").value = "";
+};
+
+/* -----------------------------
+   Register service worker
+--------------------------------*/
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js");
+}
+</script>
+</body>
+</html>
